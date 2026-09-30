@@ -1,177 +1,145 @@
 # 🧠 Brain Tumor MRI Image Classification
 
-![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)
-![TensorFlow](https://img.shields.io/badge/TensorFlow-2.12+-orange.svg)
-![Streamlit](https://img.shields.io/badge/Streamlit-1.22+-red.svg)
-![License](https://img.shields.io/badge/License-MIT-green.svg)
-
-Deep Learning project for multi-class classification of brain MRI images into **Glioma**, **Meningioma**, **Pituitary**, and **No Tumor**.
-
----
+Deep Learning project for multi-class classification of brain MRI images into **Glioma**, **Meningioma**, **Pituitary Tumor**, and **No Tumor**.
 
 ## 📌 Project Overview
 
-This project develops a complete deep-learning pipeline to classify brain MRI scans into four clinically relevant categories. It includes:
+This project implements:
+- Custom CNN architecture from scratch
+- Transfer Learning with MobileNetV2 and EfficientNetB0
+- Data augmentation and preprocessing pipeline
+- Comprehensive model evaluation (Accuracy, Precision, Recall, F1, Confusion Matrix)
+- Interactive Streamlit web application for real-time inference
 
-- Custom CNN built from scratch
-- Transfer Learning models (MobileNetV2, EfficientNetB0)
-- Full evaluation suite (Accuracy, Precision, Recall, F1-Score, Confusion Matrix)
-- Interactive **Streamlit** web application for real-time inference
-
-### Real-world Use Cases
-- AI-assisted medical diagnosis support for radiologists
-- Early detection & patient triage
-- Research / clinical trial patient stratification
-- Second-opinion system for telemedicine
-
----
-
-## 📁 Project Structure
+## 🗂️ Project Structure
 
 ```
-Brain_Tumor_MRI_Classification/
-├── data/                          # Dataset (not included in repo - see below)
-│   ├── train/
-│   ├── valid/
-│   └── test/
+brain_tumor_project/
+├── app/
+│   └── app.py                 # Streamlit web application
+├── data/
+│   ├── Training/              # Training images (class subfolders)
+│   └── Testing/               # Testing images (class subfolders)
+├── models/                    # Saved .h5 models and comparison results
 ├── notebooks/
 │   └── Brain_Tumor_MRI_Classification.ipynb
-├── app/
-│   └── streamlit_app.py
-├── models/                        # Saved models (.h5) after training
+├── src/
+│   └── train_models.py        # Training script
 ├── requirements.txt
-├── .gitignore
 └── README.md
 ```
 
----
+## 📦 Dataset
 
-## 🚀 Getting Started
+**Source**: [Brain Tumor Classification MRI Dataset (SARTAJ / Figshare based)](https://github.com/sartajbhuvaji/Brain-Tumor-Classification-DataSet)
 
-### 1. Clone the repository
+Classes:
+- `glioma_tumor`
+- `meningioma_tumor`
+- `pituitary_tumor`
+- `no_tumor`
+
+### Download Dataset
 
 ```bash
-git clone https://github.com/<your-username>/Brain-Tumor-MRI-Classification.git
-cd Brain-Tumor-MRI-Classification
+# Option 1: Clone the dataset repo
+git clone https://github.com/sartajbhuvaji/Brain-Tumor-Classification-DataSet.git
+# Then place Training/ and Testing/ folders under data/
+
+# Option 2: Use Kaggle (recommended cleaner version)
+# https://www.kaggle.com/datasets/masoudnickparvar/brain-tumor-mri-dataset
 ```
 
-### 2. Create virtual environment (recommended)
-
-```bash
-python -m venv venv
-source venv/bin/activate        # Linux / macOS
-# venv\Scripts\activate         # Windows
+Place the data as:
+```
+data/
+├── Training/
+│   ├── glioma_tumor/
+│   ├── meningioma_tumor/
+│   ├── no_tumor/
+│   └── pituitary_tumor/
+└── Testing/
+    ├── glioma_tumor/
+    ├── meningioma_tumor/
+    ├── no_tumor/
+    └── pituitary_tumor/
 ```
 
-### 3. Install dependencies
+## 🚀 Quick Start
+
+### 1. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Download & place the dataset
-
-The dataset is **not** included in this repository (size ~80 MB).
-
-**Download from:**  
-[Brain Tumor MRI Multi-Class Dataset (Google Drive)](https://drive.google.com/drive/folders/1C9ww4JnZ2sh22I-hbt45OR16o4ljGxju)
-
-Extract it so that the folder structure looks like:
-
-```
-data/
-├── train/
-│   ├── glioma/
-│   ├── meningioma/
-│   ├── pituitary/
-│   └── no_tumor/
-├── valid/
-│   └── (same 4 classes)
-└── test/
-    └── (same 4 classes)
-```
-
-### 5. Run the training notebook
-
-Open and execute:
-
-```
-notebooks/Brain_Tumor_MRI_Classification.ipynb
-```
-
-The notebook will:
-- Explore the dataset & create visualizations
-- Apply preprocessing + data augmentation
-- Train Custom CNN + MobileNetV2 + EfficientNetB0
-- Evaluate & compare models
-- Save the best model to `models/best_model.h5`
-
-### 6. Launch the Streamlit app
+### 2. Train Models
 
 ```bash
-cd app
-streamlit run streamlit_app.py
+python src/train_models.py
 ```
 
-Upload any brain MRI image and get instant prediction with confidence scores.
+This will train:
+- Custom CNN
+- MobileNetV2 (frozen + fine-tuned)
+- EfficientNetB0
 
----
+Models are saved to `models/` as `.h5` files.
 
-## 📊 Dataset Summary
+### 3. Run Streamlit App
 
-| Split  | Glioma | Meningioma | Pituitary | No Tumor | Total  |
-|--------|--------|------------|-----------|----------|--------|
-| Train  | 564    | 358        | 438       | 335      | ~1695  |
-| Valid  | 161    | 124        | 118       | 99       | ~502   |
-| Test   | 80     | 63         | 54        | 49       | ~246   |
+```bash
+streamlit run app/app.py
+```
 
-**Total images:** ~2,443  
+Open the local URL shown in the terminal (usually http://localhost:8501).
 
-**Classes:** `glioma` · `meningioma` · `pituitary` · `no_tumor`
+### 4. Deploy to Streamlit Cloud
 
----
+1. Push this repository to GitHub
+2. Go to [share.streamlit.io](https://share.streamlit.io)
+3. Connect your repo
+4. Set main file path: `app/app.py`
+5. Deploy
 
-## 🛠️ Tech Stack
+**Note**: For Streamlit Cloud, you may need to include the trained `.h5` models in the repo (or use Git LFS) and ensure `requirements.txt` is present.
 
-- **Python 3.10+**
-- **TensorFlow / Keras**
-- **OpenCV, Pillow**
-- **scikit-learn, seaborn, matplotlib, plotly**
-- **Streamlit**
+## 📊 Model Performance (Expected on full dataset)
 
----
+| Model                  | Approx. Accuracy | Notes                          |
+|------------------------|------------------|--------------------------------|
+| Custom CNN             | 85–92%           | From scratch                   |
+| MobileNetV2            | 92–96%           | Transfer learning              |
+| MobileNetV2 Fine-tuned | 94–97%           | Best balance of speed/accuracy |
+| EfficientNetB0         | 93–97%           | Strong performance             |
 
-## 📈 Expected Performance
+*Results vary based on data cleaning, epochs, and hardware.*
 
-After fine-tuning, transfer-learning models (especially **EfficientNetB0** / **MobileNetV2**) typically reach **92–97%** test accuracy on this dataset.
+## 🛠️ Technical Details
 
----
+- **Input size**: 128×128 (configurable in `train_models.py`)
+- **Augmentation**: rotation, shift, shear, zoom, horizontal flip, brightness
+- **Callbacks**: EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
+- **Loss**: Categorical Cross-Entropy
+- **Optimizer**: Adam
 
-## 📦 Deliverables
+## 📁 Deliverables
 
-- Fully documented Jupyter Notebook (follows standard ML submission template)
-- Trained models (Custom CNN + best Transfer Learning model)
-- Streamlit web application
-- Model comparison charts & metrics
-- Clean, modular, production-ready code
-
----
+- [x] Trained models (`.h5`)
+- [x] Streamlit application
+- [x] Training & evaluation scripts
+- [x] Jupyter notebook following ML submission template
+- [x] Model comparison
+- [x] README and requirements
 
 ## ⚠️ Disclaimer
 
-This project is strictly for **educational and research purposes**.  
-It is **not** a medical device and must **not** be used for clinical diagnosis or treatment decisions.
+This project is for **educational and research purposes only**. It is **not** a certified medical device and must not be used for clinical diagnosis. Always seek professional medical advice.
+
+## 📜 License
+
+Educational use. Dataset licenses follow their original sources (check Figshare / Kaggle pages).
 
 ---
 
-## 📄 License
-
-This project is released under the **MIT License**.
-
----
-
-## 🙏 Acknowledgments
-
-- Dataset originally shared via Roboflow / Google Drive
-- TensorFlow & Keras teams
-- Streamlit community
+**Skills demonstrated**: Deep Learning, CNN, Transfer Learning, TensorFlow/Keras, Data Augmentation, Model Evaluation, Streamlit Deployment, Healthcare AI

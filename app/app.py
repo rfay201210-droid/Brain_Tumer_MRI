@@ -1,0 +1,144 @@
+"""
+Brain Tumor MRI Classification - Streamlit Web Application
+Upload an MRI image and get predicted tumor type with confidence.
+"""
+
+import streamlit as st
+import numpy as np
+import tensorflow as tf
+from tensorflow.keras.models import load_model
+from PIL import Image
+import os
+import json
+
+# Page config
+st.set_page_config(
+    page_title="Brain Tumor MRI Classifier",
+    page_icon="🧠",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+# Paths
+APP_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_DIR = os.path.dirname(APP_DIR)
+MODEL_DIR = os.path.join(PROJECT_DIR, "models")
+
+CLASS_NAMES = {
+    0: "Glioma Tumor",
+    1: "Meningioma Tumor",
+    2: "No Tumor",
+    3: "Pituitary Tumor"
+}
+
+CLASS_DESCRIPTIONS = {
+    "Glioma Tumor": "Gliomas are tumors that arise from glial cells in the brain. They can be aggressive and require prompt medical attention.",
+    "Meningioma Tumor": "Meningiomas develop from the meninges (protective membranes covering the brain). Most are benign and slow-growing.",
+    "No Tumor": "No abnormal tumor tissue detected in the MRI scan. The brain appears within normal limits for this analysis.",
+    "Pituitary Tumor": "Pituitary tumors form in the pituitary gland at the base of the brain. Many are benign but can affect hormone production."
+}
+
+@st.cache_resource
+def load_selected_model(model_choice):
+    mapping = {
+        "Custom CNN": "custom_cnn_best.h5",
+        "MobileNetV2": "mobilenetv2_best.h5",
+        "MobileNetV2 Fine-tuned": "mobilenetv2_finetuned_best.h5",
+        "EfficientNetB0": "efficientnetb0_best.h5"
+    }
+    path = os.path.join(MODEL_DIR, mapping.get(model_choice, "custom_cnn_best.h5"))
+    if not os.path.exists(path):
+        # fallback
+        candidates = [f for f in os.listdir(MODEL_DIR) if f.endswith(".h5")]
+        if candidates:
+            path = os.path.join(MODEL_DIR, candidates[0])
+        else:
+            st.error("No model files found in models/ directory. Please train models first.")
+            return None
+    try:
+        model = load_model(path, compile=False)
+        return model
+    except Exception as e:
+        st.error(f"Error loading model: {e}")
+        return None
+
+def preprocess_image(image, target_size=(128, 128)):
+    img = image.convert("RGB")
+    img = img.resize(target_size)
+    arr = np.array(img) / 255.0
+    arr = np.expand_dims(arr, axis=0)
+    return arr
+
+def main():
+    st.title("🧠 Brain Tumor MRI Image Classification")
+    st.markdown("""
+    This AI-powered tool classifies brain MRI images into four categories:
+    **Glioma**, **Meningioma**, **Pituitary Tumor**, or **No Tumor**.
+    
+    > ⚠️ **Disclaimer**: This is an educational/demo tool and **not a medical diagnosis device**. 
+    Always consult qualified healthcare professionals for medical decisions.
+    """)
+
+    with st.sidebar:
+        st.header("⚙️ Settings")
+        model_choice = st.selectbox(
+            "Select Model",
+            ["Custom CNN", "MobileNetV2", "MobileNetV2 Fine-tuned", "EfficientNetB0"],
+            index=0
+        )
+        st.markdown("---")
+        st.markdown("### About the Models")
+        st.markdown("""
+        - **Custom CNN**: Built from scratch with Conv + BN + Dropout layers
+        - **MobileNetV2**: Lightweight transfer learning model
+        - **MobileNetV2 Fine-tuned**: Further fine-tuned top layers
+        - **EfficientNetB0**: Efficient transfer learning architecture
+        """)
+        st.markdown("---")
+        st.markdown("### Dataset")
+        st.markdown("Trained on Brain Tumor MRI multi-class dataset (Glioma, Meningioma, Pituitary, No Tumor).")
+
+    col1, col2 = st.columns([1, 1])
+
+    with col1:
+        st.subheader("📤 Upload MRI Image")
+        uploaded_file = st.file_uploader(
+            "Choose a brain MRI image (JPG/PNG)",
+            type=["jpg", "jpeg", "png"]
+        )
+        if uploaded_file is not None:
+            image = Image.open(uploaded_file)
+            st.image(image, caption="Uploaded MRI", use_container_width=True)
+
+    with col2:
+        st.subheader("🔮 Prediction Result")
+        if uploaded_file is not None:
+            model = load_selected_model(model_choice)
+            if model is not None:
+                with st.spinner("Analyzing MRI image..."):
+                    processed = preprocess_image(image)
+                    preds = model.predict(processed, verbose=0)[0]
+                    pred_idx = int(np.argmax(preds))
+                    confidence = float(preds[pred_idx]) * 100
+                    pred_class = CLASS_NAMES.get(pred_idx, "Unknown")
+
+                st.success(f"**Predicted Class: {pred_class}**")
+                st.metric("Confidence", f"{confidence:.2f}%")
+
+                st.markdown("#### Class Probabilities")
+                for i, name in CLASS_NAMES.items():
+                    st.progress(float(preds[i]), text=f"{name}: {preds[i]*100:.1f}%")
+
+                st.info(CLASS_DESCRIPTIONS.get(pred_class, ""))
+        else:
+            st.info("👈 Please upload a brain MRI image to get a prediction.")
+
+    st.markdown("---")
+    st.markdown("### 📌 Project Info")
+    st.markdown("""
+    **Skills**: Deep Learning · CNN · Transfer Learning · TensorFlow/Keras · Streamlit · Medical Imaging  
+    **Workflow**: Data Preprocessing → Augmentation → Custom CNN → Transfer Learning → Evaluation → Deployment
+    """)
+
+if __name__ == "__main__":
+    main()

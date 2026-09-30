@@ -1,0 +1,18 @@
+{
+  "custom_cnn": {
+    "accuracy": 0.87,
+    "macro_f1": 0.86
+  },
+  "mobilenetv2": {
+    "accuracy": 0.93,
+    "macro_f1": 0.92
+  },
+  "mobilenetv2_finetuned": {
+    "accuracy": 0.95,
+    "macro_f1": 0.94
+  },
+  "efficientnetb0": {
+    "accuracy": 0.94,
+    "macro_f1": 0.93
+  }
+}
